@@ -17,7 +17,7 @@ func main() {
 	ANTHROPIC_KEY := os.Getenv("ANTHROPIC_KEY")
 
 	if ANTHROPIC_BASEURL == "" || ANTHROPIC_KEY == "" {
-		panic("请使用 export ANTHROPIC_BASEURL=\"xxxx\" 或者export ANTHROPIC_KEY=\"yyy\" 设置环境变量")
+		log.Println("请使用 export ANTHROPIC_BASEURL=\"xxxx\" 或者export ANTHROPIC_KEY=\"yyy\" 设置环境变量")
 	}
 
 	if len(os.Args) < 2 {
@@ -101,10 +101,8 @@ func main() {
 					panic(err)
 				}
 				log.Println("工具调用 msgCnt.Type: ", "tool_use; ", "tool_name: ", msgCnt.Name, "msgCnt.input.command", toolCallInfo["command"])
-				execOutput, err := RunBashCommand(toolCallInfo["command"])
-				if err != nil {
-					panic(err)
-				}
+				execOutput := RunBashCommand(toolCallInfo["command"])
+
 				messsages = append(messsages, anthropic.MessageParam{
 					Role: anthropic.MessageParamRoleUser,
 					Content: []anthropic.ContentBlockParamUnion{
@@ -128,11 +126,14 @@ func main() {
 
 }
 
-func RunBashCommand(command string) (string, error) {
+func RunBashCommand(command string) string {
 	cmd := exec.CommandContext(context.Background(), "sh", "-c", command)
 	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return err.Error()
+	}
 
-	return string(output), err
+	return string(output)
 }
 
 func toContentBlockParams(blocks []anthropic.ContentBlockUnion) []anthropic.ContentBlockParamUnion {
