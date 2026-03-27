@@ -77,7 +77,52 @@ func main() {
 }
 
 func getTodoListTools() []anthropic.ToolUnionParam {
-	tools := []anthropic.ToolUnionParam{}
+	tools := []anthropic.ToolUnionParam{
+		// Bash
+		{
+			OfTool: &anthropic.ToolParam{
+				Name:        "Bash",
+				Description: anthropic.String("MacOs或者Linux上的Shell或者Bash终端"),
+				InputSchema: anthropic.ToolInputSchemaParam{
+					Type: "object",
+					Properties: map[string]any{
+						"command": map[string]any{
+							"type":        "string",
+							"description": "要执行的shell命令",
+						},
+					},
+					Required: []string{"command"},
+				},
+			},
+		},
+		// Task List
+		{
+			OfTool: &anthropic.ToolParam{
+				Name:        "TaskList",
+				Description: anthropic.String("用于规划和记录复杂任务和多步骤任务的工具"),
+				InputSchema: anthropic.ToolInputSchemaParam{
+					Type: "object",
+					Properties: map[string]any{
+						"list": map[string]any{
+							"type":        "array",
+							"description": "任务列表项",
+							"items": map[string]any{
+								"status": map[string]any{
+									"type":        "number",
+									"description": "任务状态: 1表示未执行，2表示进行中，3表示已执行",
+								},
+								"desc": map[string]any{
+									"type":        "string",
+									"description": "任务列表项的描述",
+								},
+							},
+						},
+					},
+					Required: []string{""},
+				},
+			},
+		},
+	}
 
 	return tools
 }
