@@ -187,9 +187,10 @@ func execTool(toolName string, params []byte) (string, error) {
 		taskExecRes += taskStatusIcon[taskItem.Status] + " " + taskItem.Desc + "\n"
 	}
 
-	summary := fmt.Sprintf(" completed %d of %d items ", completedCnt, taskCnt)
-	log.Println("任务进度更新： " + summary)
+	summary := fmt.Sprintf(" completed %d of %d items \n", completedCnt, taskCnt)
 	taskExecRes += summary
+
+	log.Println("任务进度更新： " + taskExecRes)
 
 	return taskExecRes, nil
 }
