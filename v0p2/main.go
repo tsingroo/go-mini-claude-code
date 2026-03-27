@@ -18,15 +18,29 @@ func main() {
 	API_KEY, hasApiKey := os.LookupEnv("ANTHROPIC_KEY")
 
 	if !hasBaseUrl || !hasApiKey {
-		log.Printf("ANTHROPIC_BASEURL 或者 ANTHROPIC_KEY 环境变量缺失")
+		log.Println("请使用 export ANTHROPIC_BASEURL=\"xxxx\" 或者export ANTHROPIC_KEY=\"yyy\" 设置环境变量")
 		return
 	}
+
+	if len(os.Args) < 2 {
+		fmt.Println("请提供参数: ./gmcc \"帮我分析一下这个项目实现的功能\"")
+		os.Exit(1)
+	}
+
+	userAskQuestion := os.Args[1]
 
 	agentReqClient := anthropic.NewClient(
 		option.WithBaseURL(BASE_URL),
 		option.WithAPIKey(API_KEY),
 	)
-	messages := []anthropic.MessageParam{}
+	messages := []anthropic.MessageParam{
+		{
+			Role: anthropic.MessageParamRoleUser,
+			Content: []anthropic.ContentBlockParamUnion{
+				anthropic.NewTextBlock(userAskQuestion),
+			},
+		},
+	}
 
 	loopCount := 1
 
