@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -44,12 +48,18 @@ func main() {
 
 		// 2.响应的StopReason如果不是工具调用就退出循环。
 		if resp.StopReason != anthropic.StopReasonToolUse {
+			log.Println("完成任务! 正常退出。")
 			return
 		}
 		// 3.如果是工具调用就执行工具调用,继续循环
 		for _, cnt := range resp.Content {
 			if cnt.Type == "tool_use" {
-				toolExecRes := execTool(cnt.Name, cnt.Input)
+				toolExecRes, toolExecErr := execTool(cnt.Name, cnt.Input)
+				hasErr := false
+				if toolExecErr != nil {
+					hasErr = true
+					toolExecRes = toolExecErr.Error()
+				}
 				messages = append(messages,
 					anthropic.NewAssistantMessage(anthropic.ContentBlockParamUnion{
 						OfToolUse: &anthropic.ToolUseBlockParam{
@@ -63,6 +73,7 @@ func main() {
 					anthropic.NewUserMessage(anthropic.ContentBlockParamUnion{
 						OfToolResult: &anthropic.ToolResultBlockParam{
 							ToolUseID: cnt.ID,
+							IsError:   anthropic.Bool(hasErr),
 							Content: []anthropic.ToolResultBlockParamContentUnion{
 								{OfText: &anthropic.TextBlockParam{
 									Text: toolExecRes,
@@ -127,7 +138,45 @@ func getTodoListTools() []anthropic.ToolUnionParam {
 	return tools
 }
 
-func execTool(toolName string, params []byte) string {
+func execTool(toolName string, params []byte) (string, error) {
+	if toolName == "Bash" {
+		command := string(params)
+		cmd := exec.CommandContext(context.Background(), "sh", "-c", command)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return "", err
+		}
 
-	return ""
+		return string(output), nil
+	}
+	// Task List
+	taskList := []TaskListItem{}
+	if err := json.Unmarshal(params, &taskList); err != nil {
+		log.Printf("模型返回的任务列表格式错误, %s", string(params))
+		return "", errors.New("反序列化错误, 任务列表格式错误")
+	}
+	taskExecRes := ""
+	completedCnt := 0
+	taskCnt := len(taskList)
+	for _, taskItem := range taskList {
+		taskStatusIcon := []string{"", "[x]", "[>]", "[ ]"}
+		if taskItem.Status > 3 || taskItem.Status < 1 {
+			continue
+		}
+		if taskItem.Status == 3 {
+			completedCnt++
+		}
+		taskExecRes += taskStatusIcon[taskItem.Status] + " " + taskItem.Desc + "\n"
+	}
+
+	summary := fmt.Sprintf(" completed %d of %d items ", completedCnt, taskCnt)
+	log.Println("任务进度更新： " + summary)
+	taskExecRes += summary
+
+	return taskExecRes, nil
+}
+
+type TaskListItem struct {
+	Status int    `json:"status"`
+	Desc   string `json:"desc"`
 }
