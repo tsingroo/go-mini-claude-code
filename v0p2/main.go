@@ -28,7 +28,11 @@ func main() {
 	)
 	messages := []anthropic.MessageParam{}
 
+	loopCount := 1
+
 	for {
+		log.Printf("-------------   第 %d 次交互 -------------\n", loopCount)
+
 		// 1.发送请求,并接收响应
 		resp, err := agentReqClient.Messages.New(context.Background(), anthropic.MessageNewParams{
 			MaxTokens: 16 * 1024,
