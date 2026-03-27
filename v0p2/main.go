@@ -46,11 +46,12 @@ func main() {
 
 	for {
 		log.Printf("-------------   第 %d 次交互 -------------\n", loopCount)
+		loopCount++
 
 		// 1.发送请求,并接收响应
 		resp, err := agentReqClient.Messages.New(context.Background(), anthropic.MessageNewParams{
 			MaxTokens: 16 * 1024,
-			Model:     anthropic.ModelClaudeSonnet4_6,
+			Model:     "kimi-for-coding",
 			System: []anthropic.TextBlockParam{
 				{
 					Type: "text",
@@ -100,6 +101,8 @@ func main() {
 						},
 					}),
 				)
+			} else {
+				log.Printf("工具调用中的内容输出: %s", cnt.Text)
 			}
 		}
 	}
@@ -168,15 +171,15 @@ func execTool(toolName string, params []byte) (string, error) {
 		return string(output), nil
 	}
 	// Task List
-	taskList := []TaskListItem{}
-	if err := json.Unmarshal(params, &taskList); err != nil {
+	taskCallParam := TaskListCallParams{}
+	if err := json.Unmarshal(params, &taskCallParam); err != nil {
 		log.Printf("模型返回的任务列表格式错误, %s", string(params))
 		return "", errors.New("反序列化错误, 任务列表格式错误")
 	}
 	taskExecRes := ""
 	completedCnt := 0
-	taskCnt := len(taskList)
-	for _, taskItem := range taskList {
+	taskCnt := len(taskCallParam.List)
+	for _, taskItem := range taskCallParam.List {
 		taskStatusIcon := []string{"", "[x]", "[>]", "[ ]"}
 		if taskItem.Status > 3 || taskItem.Status < 1 {
 			continue
@@ -195,7 +198,9 @@ func execTool(toolName string, params []byte) (string, error) {
 	return taskExecRes, nil
 }
 
-type TaskListItem struct {
-	Status int    `json:"status"`
-	Desc   string `json:"desc"`
+type TaskListCallParams struct {
+	List []struct {
+		Status int    `json:"status"`
+		Desc   string `json:"desc"`
+	} `json:"list"`
 }
