@@ -73,6 +73,7 @@ func main() {
 		// 3.如果是工具调用就执行工具调用,继续循环
 		for _, cnt := range resp.Content {
 			if cnt.Type == "tool_use" {
+				log.Printf("调用工具: %s , %s", cnt.Name, string(cnt.Input))
 				toolExecRes, toolExecErr := execTool(cnt.Name, cnt.Input)
 				hasErr := false
 				if toolExecErr != nil {
@@ -161,7 +162,13 @@ func getTodoListTools() []anthropic.ToolUnionParam {
 
 func execTool(toolName string, params []byte) (string, error) {
 	if toolName == "Bash" {
-		command := string(params)
+		var BashCallParams struct {
+			Command string `json:"command"`
+		}
+		if err := json.Unmarshal(params, &BashCallParams); err != nil {
+			return "", err
+		}
+		command := BashCallParams.Command
 		cmd := exec.CommandContext(context.Background(), "sh", "-c", command)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -180,7 +187,7 @@ func execTool(toolName string, params []byte) (string, error) {
 	completedCnt := 0
 	taskCnt := len(taskCallParam.List)
 	for _, taskItem := range taskCallParam.List {
-		taskStatusIcon := []string{"", "[x]", "[>]", "[ ]"}
+		taskStatusIcon := []string{"", "[ ]", "[>]", "[x]"}
 		if taskItem.Status > 3 || taskItem.Status < 1 {
 			continue
 		}
