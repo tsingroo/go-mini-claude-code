@@ -70,6 +70,8 @@ func main() {
 			for _, cnt := range resp.Content {
 				log.Printf("最后的内容输出： %s\n", cnt.Text)
 			}
+			log.Printf("输入Token数 %.1f k", float64(resp.Usage.InputTokens)/1000.0)
+			log.Printf("输出Token数 %.1f k", float64(resp.Usage.OutputTokens)/1000.0)
 			log.Println("完成任务! 正常退出。")
 			return
 		}
