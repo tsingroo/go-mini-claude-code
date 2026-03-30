@@ -67,6 +67,9 @@ func main() {
 
 		// 2.响应的StopReason如果不是工具调用就退出循环。
 		if resp.StopReason != anthropic.StopReasonToolUse {
+			for _, cnt := range resp.Content {
+				log.Printf("最后的内容输出： %s\n", cnt.Text)
+			}
 			log.Println("完成任务! 正常退出。")
 			return
 		}
