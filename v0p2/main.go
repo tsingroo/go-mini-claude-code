@@ -156,7 +156,7 @@ func getTodoListTools() []anthropic.ToolUnionParam {
 							},
 						},
 					},
-					Required: []string{""},
+					Required: []string{"list"},
 				},
 			},
 		},
