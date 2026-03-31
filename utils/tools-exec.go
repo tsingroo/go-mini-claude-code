@@ -128,6 +128,8 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 			if cnt.Type != "tool_use" {
 				continue
 			}
+
+			log.Printf("    > 子代理调用工具: %s , %s", cnt.Name, string(cnt.Input))
 			output, err := subagentExecTool(cnt.Name, cnt.Input)
 			if err != nil {
 				continue
