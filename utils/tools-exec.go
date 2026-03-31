@@ -90,7 +90,11 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 		anthropic.NewUserMessage(anthropic.NewTextBlock(subAgentParam.Prompt)),
 	}
 
+	loopCount := 1
 	for {
+		log.Printf("-------------   子代理第 %d 次交互 -------------\n", loopCount)
+		loopCount++
+
 		// 1.发送请求，接收响应
 		resp, err := subAgentClient.Messages.New(context.TODO(), anthropic.MessageNewParams{
 			MaxTokens: 16 * 1024,
@@ -112,6 +116,10 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 			if len(resp.Content) > 0 {
 				retMsg = resp.Content[0].Text
 			}
+
+			log.Printf("    > 子代理输入Token数 %.1f k", float64(resp.Usage.InputTokens)/1000.0)
+			log.Printf("    > 子代理输出Token数 %.1f k", float64(resp.Usage.OutputTokens)/1000.0)
+			log.Printf("    > 子代理返回内容: %s \n", retMsg)
 
 			return retMsg, nil
 		}

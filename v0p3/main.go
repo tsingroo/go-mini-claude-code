@@ -33,7 +33,11 @@ func main() {
 	}
 	ctx := context.Background()
 
+	loopCount := 1
 	for {
+		log.Printf("-------------   第 %d 次交互 -------------\n", loopCount)
+		loopCount++
+
 		// 1.发送请求，并接受响应
 		resp, err := agentClient.Messages.New(ctx, anthropic.MessageNewParams{
 			MaxTokens: 16 * 1024,
@@ -55,6 +59,8 @@ func main() {
 			for _, cnt := range resp.Content {
 				log.Printf("非工具调用内容输出: %s \n", cnt.Text)
 			}
+			log.Printf("主代理输入Token数 %.1f k", float64(resp.Usage.InputTokens)/1000.0)
+			log.Printf("主代理输出Token数 %.1f k", float64(resp.Usage.OutputTokens)/1000.0)
 			log.Println("调用结束，主代理退出")
 			return
 		}
@@ -64,6 +70,8 @@ func main() {
 				log.Printf("工具调用中的内容输出: %s \n", cnt.Text)
 				continue
 			}
+
+			log.Printf("调用工具: %s , %s", cnt.Name, string(cnt.Input))
 			output, err := executeTools(cnt.Name, cnt.Input, modelInfo)
 			if err != nil {
 				// TODO: 添加错误
@@ -103,6 +111,7 @@ func executeTools(name string, toolParams []byte, modelInfo *utils.ModelInfo) (s
 
 	// SubAgent
 	if name == "SubAgent" {
+		log.Println("---------- 开始调用子代理执行任务 ------------")
 		return utils.ExecSubagentTool(modelInfo, toolParams)
 	}
 

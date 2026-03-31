@@ -45,7 +45,7 @@ func main() {
 	loopCount := 1
 
 	for {
-		log.Printf("-------------   第 %d 次交互 -------------\n", loopCount)
+		log.Printf("-------------   主代理第 %d 次交互 -------------\n", loopCount)
 		loopCount++
 
 		// 1.发送请求,并接收响应
