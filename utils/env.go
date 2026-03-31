@@ -15,7 +15,7 @@ type ModelInfo struct {
 
 func GetModelInfo() (*ModelInfo, error) {
 	BASE_URL, hasBaseUrl := os.LookupEnv("ANTHROPIC_BASEURL")
-	API_KEY, hasKey := os.LookupEnv("ANTHROPIC_APIKEY")
+	API_KEY, hasKey := os.LookupEnv("ANTHROPIC_KEY")
 	MODEL_NAME, hasModelName := os.LookupEnv("ANTHROPIC_MODEL")
 
 	if !hasBaseUrl || !hasKey {
