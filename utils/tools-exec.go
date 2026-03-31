@@ -95,9 +95,13 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 		resp, err := subAgentClient.Messages.New(context.TODO(), anthropic.MessageNewParams{
 			MaxTokens: 16 * 1024,
 			Model:     anthropic.Model(modelInfo.ModelName),
-			System:    []anthropic.TextBlockParam{},
-			Messages:  messages,
-			Tools:     GetTools(true),
+			System: []anthropic.TextBlockParam{
+				{
+					Text: "你是一个主代理生成的子代理，你在全新的上下文中执行任务，所以你返回信息的时候要返回完整必要但不冗余的信息来供主代理做出下一步的决策。",
+				},
+			},
+			Messages: messages,
+			Tools:    GetTools(true),
 		})
 		if err != nil {
 			panic(err.Error())
