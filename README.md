@@ -5,7 +5,7 @@
 
 #### v0.1 实现了执行bash命令并循环直到任务完成
 #### v0.2 实现任务列表
-#### v0.3 实现子代理(SubAgent)
+#### v0.3 实现子代理(SubAgent)，加入模型环境变量
 #### v0.4 实现不支持function_call的大模型的fallback调用
 
 
@@ -19,4 +19,3 @@
 - https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling
 - https://platform.claude.com/docs/en/api/go/messages/create
 - https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-reference
-
