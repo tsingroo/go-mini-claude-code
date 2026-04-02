@@ -45,7 +45,7 @@ func main() {
 	loopCount := 1
 
 	for {
-		log.Printf("-------------   第 %d 次交互 -------------\n", loopCount)
+		log.Printf("-------------   主代理第 %d 次交互 -------------\n", loopCount)
 		loopCount++
 
 		// 1.发送请求,并接收响应
@@ -67,6 +67,11 @@ func main() {
 
 		// 2.响应的StopReason如果不是工具调用就退出循环。
 		if resp.StopReason != anthropic.StopReasonToolUse {
+			for _, cnt := range resp.Content {
+				log.Printf("最后的内容输出： %s\n", cnt.Text)
+			}
+			log.Printf("输入Token数 %.1f k", float64(resp.Usage.InputTokens)/1000.0)
+			log.Printf("输出Token数 %.1f k", float64(resp.Usage.OutputTokens)/1000.0)
 			log.Println("完成任务! 正常退出。")
 			return
 		}
@@ -151,7 +156,7 @@ func getTodoListTools() []anthropic.ToolUnionParam {
 							},
 						},
 					},
-					Required: []string{""},
+					Required: []string{"list"},
 				},
 			},
 		},
