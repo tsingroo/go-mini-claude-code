@@ -43,7 +43,7 @@ func main() {
 			MaxTokens: 16 * 1024,
 			System: []anthropic.TextBlockParam{
 				{
-					Text: "你是一个CLI命令行编码助手。无论任务难易程度如何，你都需要制定一个多步骤的任务计划来完成用户的请求。任务计划中的每一项都要使用子代理来完成。",
+					Text: "你是一个CLI命令行编码助手。无论任务难易程度如何，你都需要制定一个多步骤的任务计划来完成用户的请求。任务计划中的任务项如果完全不依赖主代理的上下文就使用子代理去执行这个任务。",
 				},
 			},
 			Model:    anthropic.Model(modelInfo.ModelName),
