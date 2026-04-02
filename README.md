@@ -6,7 +6,8 @@
 #### v0.1 实现了执行bash命令并循环直到任务完成
 #### v0.2 实现任务列表
 #### v0.3 实现子代理(SubAgent)，加入模型环境变量
-#### v0.4 实现不支持function_call的大模型的fallback调用
+#### v0.4 实现Skills的支持
+#### v0.5 实现不支持function_call的大模型的fallback调用
 
 
 ### Agent的执行过程
