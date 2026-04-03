@@ -130,9 +130,11 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 			}
 
 			log.Printf("    > 子代理调用工具: %s , %s", cnt.Name, string(cnt.Input))
-			output, err := subagentExecTool(cnt.Name, cnt.Input)
-			if err != nil {
-				continue
+			toolExecRes, toolExecErr := subagentExecTool(cnt.Name, cnt.Input)
+			hasErr := false
+			if toolExecErr != nil {
+				hasErr = true
+				toolExecRes = toolExecErr.Error()
 			}
 			messages = append(messages, anthropic.NewAssistantMessage(anthropic.ContentBlockParamUnion{
 				OfToolUse: &anthropic.ToolUseBlockParam{
@@ -144,10 +146,10 @@ func ExecSubagentTool(modelInfo *ModelInfo, params []byte) (string, error) {
 			messages = append(messages, anthropic.NewUserMessage(anthropic.ContentBlockParamUnion{
 				OfToolResult: &anthropic.ToolResultBlockParam{
 					ToolUseID: cnt.ID,
-					IsError:   anthropic.Bool(false),
+					IsError:   anthropic.Bool(hasErr),
 					Content: []anthropic.ToolResultBlockParamContentUnion{
 						{
-							OfText: &anthropic.TextBlockParam{Text: output},
+							OfText: &anthropic.TextBlockParam{Text: toolExecRes},
 						},
 					},
 				},

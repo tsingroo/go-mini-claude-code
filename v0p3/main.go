@@ -72,10 +72,11 @@ func main() {
 			}
 
 			log.Printf("调用工具: %s , %s", cnt.Name, string(cnt.Input))
-			output, err := executeTools(cnt.Name, cnt.Input, modelInfo)
-			if err != nil {
-				// TODO: 添加错误
-				continue
+			toolExecRes, toolExecErr := executeTools(cnt.Name, cnt.Input, modelInfo)
+			hasErr := false
+			if toolExecErr != nil {
+				hasErr = true
+				toolExecRes = toolExecErr.Error()
 			}
 			messages = append(messages, anthropic.NewAssistantMessage(anthropic.ContentBlockParamUnion{
 				OfToolUse: &anthropic.ToolUseBlockParam{
@@ -87,10 +88,10 @@ func main() {
 			messages = append(messages, anthropic.NewUserMessage(anthropic.ContentBlockParamUnion{
 				OfToolResult: &anthropic.ToolResultBlockParam{
 					ToolUseID: cnt.ID,
-					IsError:   anthropic.Bool(false),
+					IsError:   anthropic.Bool(hasErr),
 					Content: []anthropic.ToolResultBlockParamContentUnion{
 						{
-							OfText: &anthropic.TextBlockParam{Text: output},
+							OfText: &anthropic.TextBlockParam{Text: toolExecRes},
 						},
 					},
 				},
